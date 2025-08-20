@@ -2,7 +2,7 @@ import argparse
 import time
 import torch
 import torch.distributed as dist
-
+import os
 # noinspection PyUnresolvedReferences
 import deep_ep
 from .utils import (
@@ -35,6 +35,7 @@ def test_main(
     group: dist.ProcessGroup,
     should_test: bool = True,
     should_benchmark: bool = True,
+    should_profile: bool = False,
     nvl_chunk_sizes_dispatch: list[int] = None,
     nvl_chunk_sizes_combine: list[int] = None,
 ):
@@ -50,8 +51,6 @@ def test_main(
     x = torch.ones((num_tokens, hidden), dtype=torch.bfloat16, device="cuda") * rank
     x_pure_rand = torch.randn((num_tokens, hidden), dtype=torch.bfloat16, device="cuda")
     x_e4m3 = per_token_cast_to_fp8(x) if deep_ep.Buffer.is_sm90_compiled() else None
-
-    dist_breakpoint()
 
     x_e4m3 = (x_e4m3[0], x_e4m3[1].T.contiguous().T) if x_e4m3 is not None else None
     scores = torch.randn((num_tokens, num_experts), dtype=torch.float32, device="cuda").abs() + 1
@@ -97,6 +96,16 @@ def test_main(
     group.barrier()
     time.sleep(1)
 
+    should_profile = should_profile and local_rank == 0
+
+    if should_profile:
+        from torch._C._profiler import _ExperimentalConfig
+
+        profiler = torch.profiler.profile(
+            activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+            with_stack=True,
+            experimental_config=_ExperimentalConfig(verbose=True),
+        )
     # Config
     nvl_buffer_size = 256
     config = deep_ep.Config(num_sms, 8, nvl_buffer_size)
@@ -122,6 +131,9 @@ def test_main(
                                 flush=True,
                                 end="",
                             )
+                            if should_profile:
+                                profiler.start()
+
                         dispatch_args = {
                             "x": current_x,
                             "num_tokens_per_rank": num_tokens_per_rank,
@@ -270,6 +282,14 @@ def test_main(
 
                         if local_rank == 0:
                             print(" passed", flush=True)
+                            if should_profile:
+                                profiler.stop()
+                                profiler.key_averages().table(
+                                    sort_by="self_cuda_time_total",
+                                    row_limit=-1,
+                                    max_name_column_width=200,
+                                )
+
         if local_rank == 0:
             print("", flush=True)
 
@@ -304,10 +324,8 @@ def test_main(
                     )
             if local_rank == 0:
                 print(
-                    f"[tuning] Best dispatch ({'FP8' if isinstance(current_x, tuple) else 'BF16'}):\
-                        SMs {best_results[0]}, NVL chunk {best_results[1]}, \
-                            {nvl_recv_bytes / 1e9 / best_time:.2f} \GB/s (NVL), \
-                                t: {best_time * 1e6:.2f} us",
+                    f"[tuning] Best dispatch ({'FP8' if isinstance(current_x, tuple) else 'BF16'}): "
+                    f"SMs {best_results[0]}, NVL chunk {best_results[1]}, {nvl_recv_bytes / 1e9 / best_time:.2f} GB/s (NVL), t: {best_time * 1e6:.2f} us",
                     flush=True,
                 )
                 print("", flush=True)
@@ -366,18 +384,28 @@ def test_main(
             )
             print("", flush=True)
 
+def initialize_distributed():
+    dist.init_process_group(backend="nccl")
+    rank = dist.get_rank()
+    world_size = dist.get_world_size()
+    group = dist.new_group(list(range(world_size)))
+    local_rank = int(os.environ.get("LOCAL_RANK", None))
+    assert local_rank is not None and local_rank == rank
+    torch.cuda.set_device(local_rank)
+
+    return rank, world_size, group
 
 # noinspection PyUnboundLocalVariable,PyShadowingNames
-def test_loop(local_rank: int, num_local_ranks: int, args: argparse.Namespace):
-    rank, num_ranks, group = init_dist(local_rank, num_local_ranks)
+def test_loop(args: argparse.Namespace):
+
     test_ll_compatibility, num_rdma_bytes = False, 0
+    local_rank, num_ranks, group = initialize_distributed()
 
     # if test_ll_compatibility:
     #     ll_num_tokens, ll_hidden, ll_num_experts, ll_num_topk = 16, 5120, 256, 9
     #     num_rdma_bytes = deep_ep.Buffer.get_low_latency_rdma_size_hint(
     #         ll_num_tokens, ll_hidden, num_ranks, ll_num_experts
     #     )
-    dist_breakpoint()
     buffer = deep_ep.Buffer(
         group,
         int(2e9),
@@ -387,9 +415,21 @@ def test_loop(local_rank: int, num_local_ranks: int, args: argparse.Namespace):
         explicitly_destroy=True,
     )
     torch.manual_seed(rank)
-
-    for i in range(22, 50, 2):
-        test_main(args, i, local_rank, num_ranks, rank, buffer, group)
+    if rank == 0:
+        print(f"{vars(args)}")
+    for i in args.num_sms:
+        test_main(
+            args,
+            i,
+            local_rank,
+            num_ranks,
+            rank,
+            buffer,
+            group,
+            should_test=args.test,
+            should_benchmark=args.benchmark,
+            should_profile=args.profile,
+        )
         if local_rank == 0:
             print("", flush=True)
 
@@ -434,12 +474,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num-experts", type=int, default=256, help="Number of experts (default: 256)"
     )
+    parser.add_argument("--num-sms", nargs="+", type=int, default=list(range(22, 24, 2)))
+    parser.add_argument("--test", action="store_true")
+    parser.add_argument("--benchmark", action="store_true")
+    parser.add_argument("--profile", action="store_true")
+
     args = parser.parse_args()
 
     num_processes = args.num_processes
-    import os
-
     rank = int(os.environ["RANK"])
     world_size = int(os.environ["WORLD_SIZE"])
-    # init_dist(local_rank=rank, num_local_ranks=world_size)
-    test_loop(rank, world_size, args)
+    print(f"Rank {rank} / {world_size}")
+    test_loop(args)
