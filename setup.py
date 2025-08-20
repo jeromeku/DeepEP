@@ -25,6 +25,9 @@ if __name__ == '__main__':
             nvshmem_host_lib = get_nvshmem_host_lib_name(nvshmem_dir)
             import nvidia.nvshmem as nvshmem
         except (ModuleNotFoundError, AttributeError, IndexError):
+            msg = "Warning: `NVSHMEM_DIR` is not specified, and the NVSHMEM module is not installed"
+            raise ModuleNotFoundError(msg)
+        
             print('Warning: `NVSHMEM_DIR` is not specified, and the NVSHMEM module is not installed. All internode and low-latency features are disabled\n')
             disable_nvshmem = True
     else:
