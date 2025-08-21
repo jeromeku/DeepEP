@@ -1,0 +1,212 @@
+[
+    {
+        "stage": "dispatch",
+        "num_sms": 22,
+        "nvl_chunk_size": 32,
+        "throughput": 255.8609236419386,
+        "latency": 350.41436857106737
+    },
+    {
+        "stage": "combine",
+        "num_sms": 22,
+        "nvl_chunk_size": 16,
+        "throughput": 228.7150470721507,
+        "latency": 392.0045713989102
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 24,
+        "nvl_chunk_size": 32,
+        "throughput": 275.44369073154917,
+        "latency": 326.4235087803433
+    },
+    {
+        "stage": "combine",
+        "num_sms": 24,
+        "nvl_chunk_size": 16,
+        "throughput": 247.82718053340008,
+        "latency": 362.7983654031948
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 26,
+        "nvl_chunk_size": 32,
+        "throughput": 290.3123371261216,
+        "latency": 309.1128158326051
+    },
+    {
+        "stage": "combine",
+        "num_sms": 26,
+        "nvl_chunk_size": 16,
+        "throughput": 259.3955721156594,
+        "latency": 345.9552654198239
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 28,
+        "nvl_chunk_size": 32,
+        "throughput": 310.79522210527443,
+        "latency": 286.9616315072896
+    },
+    {
+        "stage": "combine",
+        "num_sms": 28,
+        "nvl_chunk_size": 16,
+        "throughput": 274.6065968843571,
+        "latency": 324.77844673760086
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 30,
+        "nvl_chunk_size": 32,
+        "throughput": 326.69600355401633,
+        "latency": 274.87542860362
+    },
+    {
+        "stage": "combine",
+        "num_sms": 30,
+        "nvl_chunk_size": 16,
+        "throughput": 290.91366926609,
+        "latency": 308.6850618829533
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 32,
+        "nvl_chunk_size": 32,
+        "throughput": 343.04047350015594,
+        "latency": 260.1071036591822
+    },
+    {
+        "stage": "combine",
+        "num_sms": 32,
+        "nvl_chunk_size": 16,
+        "throughput": 304.68559585159153,
+        "latency": 292.8502863767195
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 34,
+        "nvl_chunk_size": 32,
+        "throughput": 358.44462701364796,
+        "latency": 249.12326554862818
+    },
+    {
+        "stage": "combine",
+        "num_sms": 34,
+        "nvl_chunk_size": 16,
+        "throughput": 312.94829465879,
+        "latency": 285.34073367410775
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 36,
+        "nvl_chunk_size": 30,
+        "throughput": 371.9096453204601,
+        "latency": 240.3350198755459
+    },
+    {
+        "stage": "combine",
+        "num_sms": 36,
+        "nvl_chunk_size": 16,
+        "throughput": 327.45948138734934,
+        "latency": 272.958692847466
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 38,
+        "nvl_chunk_size": 32,
+        "throughput": 386.5762331674697,
+        "latency": 232.12800038104155
+    },
+    {
+        "stage": "combine",
+        "num_sms": 38,
+        "nvl_chunk_size": 16,
+        "throughput": 335.09728277203595,
+        "latency": 267.78840836213567
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 40,
+        "nvl_chunk_size": 32,
+        "throughput": 404.7559277303628,
+        "latency": 220.67983661379134
+    },
+    {
+        "stage": "combine",
+        "num_sms": 40,
+        "nvl_chunk_size": 16,
+        "throughput": 349.9663628736652,
+        "latency": 255.22873474627124
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 42,
+        "nvl_chunk_size": 32,
+        "throughput": 414.02420640104737,
+        "latency": 215.4429393763445
+    },
+    {
+        "stage": "combine",
+        "num_sms": 42,
+        "nvl_chunk_size": 16,
+        "throughput": 351.14621842952596,
+        "latency": 254.0212234064024
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 44,
+        "nvl_chunk_size": 30,
+        "throughput": 430.938242738222,
+        "latency": 209.39167391280736
+    },
+    {
+        "stage": "combine",
+        "num_sms": 44,
+        "nvl_chunk_size": 16,
+        "throughput": 367.241809683756,
+        "latency": 245.70971392855358
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 46,
+        "nvl_chunk_size": 32,
+        "throughput": 432.01767110361715,
+        "latency": 205.75869448330937
+    },
+    {
+        "stage": "combine",
+        "num_sms": 46,
+        "nvl_chunk_size": 16,
+        "throughput": 367.9567905666489,
+        "latency": 241.58106136078737
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 48,
+        "nvl_chunk_size": 32,
+        "throughput": 444.3443754905566,
+        "latency": 200.96326391307673
+    },
+    {
+        "stage": "combine",
+        "num_sms": 48,
+        "nvl_chunk_size": 16,
+        "throughput": 382.76704722653415,
+        "latency": 233.29306074551175
+    },
+    {
+        "stage": "dispatch",
+        "num_sms": 50,
+        "nvl_chunk_size": 32,
+        "throughput": 460.0855085853007,
+        "latency": 195.8948550175647
+    },
+    {
+        "stage": "combine",
+        "num_sms": 50,
+        "nvl_chunk_size": 16,
+        "throughput": 392.4782456820383,
+        "latency": 229.63918380591335
+    }
+]
